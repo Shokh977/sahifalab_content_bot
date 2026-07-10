@@ -34,8 +34,8 @@ generic advice. Keep posts under ~120 words with short, punchy sentences.
 
 - For a NEWS item: given the source, write an ORIGINAL post in your own words (do NOT \
 translate it line by line) — a hook, 2-4 sentences making the key insight practical for a \
-young Uzbek reader, a one-line takeaway, and a final line crediting the source with its link. \
-Never state facts the source doesn't support.
+young Uzbek reader, and a one-line takeaway. Never state facts the source doesn't support. \
+Do not include the source URL or attribution line.
 - For a TIP: given a theme, write an original, specific, actionable post grounded in a real \
 scenario relevant to this audience.
 - For a QUOTE: given a verified quote + author, present the original line and a natural Uzbek \
@@ -78,7 +78,7 @@ async def generate_news_post(*, title: str, summary: str, url: str) -> str:
         f"Title: {title}\n"
         f"Summary: {summary}\n"
         f"Source URL: {url}\n\n"
-        "Write the Telegram post now, ending with a line crediting the source and its link."
+        "Write the Telegram post now. Do NOT include the source URL or any attribution line."
     )
     return await _generate(prompt)
 
@@ -121,7 +121,7 @@ async def generate_youtube_post(*, title: str, url: str, transcript_snippet: str
         f"Title: {title}\n"
         f"Video URL: {url}\n"
         f"Transcript excerpt: {transcript_snippet or '(unavailable — draft from the title alone)'}\n\n"
-        "Write the Telegram post now, ending with a line linking the video."
+        "Write the Telegram post now. Do NOT include a link to the video or any attribution line."
     )
     return await _generate(prompt)
 

@@ -1,10 +1,10 @@
-"""The ONLY module allowed to call bot.send_message/send_photo/send_poll on
-the channel. Every other module may only create `drafts` rows with
-status='pending_review' — this is the structural enforcement of "never
-auto-post": post_draft() is reachable only from an explicit admin approval
-callback (bot/telegram/handlers/approval.py) or a scheduler job acting on a
-draft already in approved/scheduled status, both of which require a prior
-admin tap.
+"""The ONLY module allowed to call bot.send_message/send_poll on the channel.
+Every other module may only create `drafts` rows with status='pending_review' — this is the
+structural enforcement of "never auto-post": post_draft() is reachable only from an explicit
+admin approval callback (bot/telegram/handlers/approval.py) or a scheduler job acting on a
+draft already in approved/scheduled status, both of which require a prior admin tap.
+
+All posts are sent as TEXT-ONLY messages — no images or photos.
 """
 import json
 import logging
@@ -16,7 +16,6 @@ from bot.config import settings
 from bot.cta.rotation import next_cta
 from bot.db.repo import drafts as drafts_repo
 from bot.db.repo import posts as posts_repo
-from bot.images.card_renderer import render_card
 
 logger = logging.getLogger(__name__)
 
@@ -47,18 +46,9 @@ async def post_draft(bot: Bot, pool: asyncpg.Pool, draft: asyncpg.Record) -> Non
             is_anonymous=True,
         )
         telegram_message_id = msg.message_id
-
-    elif draft["content_type"] == "image_card":
-        card_spec = draft["card_spec"]
-        if isinstance(card_spec, str):
-            card_spec = json.loads(card_spec)
-        image_bytes = render_card(card_spec)
-        from aiogram.types import BufferedInputFile
-        photo = BufferedInputFile(image_bytes, filename="card.png")
-        msg = await bot.send_photo(chat_id=settings.CHANNEL_ID, photo=photo, caption=caption)
-        telegram_message_id = msg.message_id
-
     else:
+        # TEXT-ONLY for all content types: news, tip, quote, youtube, image_card
+        # (image_card rows may exist but are sent as text)
         msg = await bot.send_message(chat_id=settings.CHANNEL_ID, text=caption)
         telegram_message_id = msg.message_id
 
@@ -72,3 +62,4 @@ async def post_draft(bot: Bot, pool: asyncpg.Pool, draft: asyncpg.Record) -> Non
         utm_campaign=utm_campaign,
     )
     logger.info("Posted draft #%s (pillar=%s) to channel", draft["id"], pillar)
+
