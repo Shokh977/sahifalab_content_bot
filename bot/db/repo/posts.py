@@ -1,4 +1,10 @@
-"""Queries against public.posts — the log of what actually shipped to the channel."""
+"""Queries against public.content_posts — the log of what actually shipped
+to the channel.
+
+Named content_posts (not "posts") because the app's social feature already
+owns public.posts for a different, user-generated-content purpose — see
+migrations/001_core_schema.sql for the collision this avoided.
+"""
 import asyncpg
 
 
@@ -13,7 +19,7 @@ async def log_post(
 ) -> int:
     row = await pool.fetchrow(
         """
-        INSERT INTO posts (draft_id, pillar, telegram_message_id, channel_id, utm_campaign)
+        INSERT INTO content_posts (draft_id, pillar, telegram_message_id, channel_id, utm_campaign)
         VALUES ($1, $2, $3, $4, $5)
         RETURNING id
         """,
@@ -26,7 +32,7 @@ async def recent_pillar_counts(pool: asyncpg.Pool, window: int) -> dict[str, int
     rows = await pool.fetch(
         """
         SELECT pillar, count(*) AS n FROM (
-            SELECT pillar FROM posts
+            SELECT pillar FROM content_posts
             WHERE pillar IN ('news', 'tip', 'quote')
             ORDER BY posted_at DESC
             LIMIT $1

@@ -90,8 +90,12 @@ CREATE TABLE IF NOT EXISTS public.drafts (
     CONSTRAINT drafts_status_check       CHECK (status IN ('pending_review','approved','scheduled','posted','rejected'))
 );
 
--- ── posts: log of what actually went to the channel ────────────────────────
-CREATE TABLE IF NOT EXISTS public.posts (
+-- ── content_posts: log of what actually went to the channel ────────────────
+-- Named content_posts (not "posts") because the app's social feature already
+-- owns public.posts (migrations/030_social_ecosystem.sql) for a different,
+-- user-generated-content purpose — CREATE TABLE IF NOT EXISTS on a colliding
+-- name would silently no-op against that unrelated table.
+CREATE TABLE IF NOT EXISTS public.content_posts (
     id                    serial PRIMARY KEY,
     draft_id              int NOT NULL REFERENCES public.drafts(id) ON DELETE CASCADE,
     pillar                text NOT NULL,
@@ -114,7 +118,7 @@ CREATE INDEX IF NOT EXISTS idx_items_status           ON public.items(status);
 CREATE INDEX IF NOT EXISTS idx_drafts_status_pillar   ON public.drafts(status, pillar);
 CREATE INDEX IF NOT EXISTS idx_drafts_scheduled       ON public.drafts(scheduled_for) WHERE status = 'scheduled';
 CREATE INDEX IF NOT EXISTS idx_quotes_verified        ON public.quotes(verified);
-CREATE INDEX IF NOT EXISTS idx_posts_posted_at        ON public.posts(posted_at DESC);
+CREATE INDEX IF NOT EXISTS idx_content_posts_posted_at ON public.content_posts(posted_at DESC);
 CREATE INDEX IF NOT EXISTS idx_topics_active          ON public.topics(active);
 
 -- ── Seed runtime-mutable settings ───────────────────────────────────────────
@@ -127,4 +131,4 @@ ON CONFLICT (key) DO NOTHING;
 -- ── Verification ─────────────────────────────────────────────────────────
 -- SELECT table_name FROM information_schema.tables
 -- WHERE table_schema='public' AND table_name IN
---   ('sources','items','topics','quotes','drafts','posts','bot_settings');
+--   ('sources','items','topics','quotes','drafts','content_posts','bot_settings');
