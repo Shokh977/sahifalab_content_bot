@@ -5,6 +5,7 @@ admin approval callback (bot/telegram/handlers/approval.py) or a scheduler job a
 draft already in approved/scheduled status, both of which require a prior admin tap.
 
 All posts are sent as TEXT-ONLY messages — no images or photos.
+Every post includes sahifalab.uz and pillar-specific hashtags.
 """
 import json
 import logging
@@ -13,25 +14,30 @@ import asyncpg
 from aiogram import Bot
 
 from bot.config import settings
-from bot.cta.rotation import next_cta
 from bot.db.repo import drafts as drafts_repo
 from bot.db.repo import posts as posts_repo
 
 logger = logging.getLogger(__name__)
 
-# Pillars that get a rotating CTA appended; poll captions can't carry links usefully.
-_CTA_ELIGIBLE_PILLARS = {"news", "tip", "quote", "youtube"}
+# Hashtags per pillar
+_PILLAR_HASHTAGS = {
+    "news": "#kun_yangiligi #sahifalab",
+    "tip": "#sahifalab",
+    "quote": "#iqtibos #sahifalab",
+    "youtube": "#sahifalab",
+    "poll": "#sahifalab",
+}
 
 
 async def post_draft(bot: Bot, pool: asyncpg.Pool, draft: asyncpg.Record) -> None:
     pillar = draft["pillar"]
-    cta_line, utm_campaign = ("", None)
-    if pillar in _CTA_ELIGIBLE_PILLARS:
-        cta_line, utm_campaign = await next_cta(pool)
-
+    
     caption = draft["body_text"] or ""
-    if cta_line:
-        caption = f"{caption}\n\n{cta_line}"
+    
+    # Append website and hashtags
+    hashtags = _PILLAR_HASHTAGS.get(pillar, "#sahifalab")
+    footer = f"\n\n🌐 {settings.UTM_BASE_URL}\n{hashtags}"
+    caption = f"{caption}{footer}"
 
     telegram_message_id = None
 
@@ -59,7 +65,8 @@ async def post_draft(bot: Bot, pool: asyncpg.Pool, draft: asyncpg.Record) -> Non
         pillar=pillar,
         telegram_message_id=telegram_message_id,
         channel_id=settings.CHANNEL_ID,
-        utm_campaign=utm_campaign,
+        utm_campaign=None,
     )
     logger.info("Posted draft #%s (pillar=%s) to channel", draft["id"], pillar)
+
 
