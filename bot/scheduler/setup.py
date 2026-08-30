@@ -59,4 +59,22 @@ def build_scheduler(bot: Bot) -> AsyncIOScheduler:
         coalesce=True,
     )
 
+    scheduler.add_job(
+        jobs.job_fetch_finance_data,
+        trigger=CronTrigger(hour=7, minute=0, timezone=tz),
+        args=[bot],
+        id="finance_data_fetch_daily",
+        max_instances=1,
+        coalesce=True,
+    )
+
+    scheduler.add_job(
+        jobs.job_flag_bad_sources,
+        trigger=CronTrigger(hour=8, minute=30, timezone=tz),
+        args=[bot],
+        id="flag_bad_sources_daily",
+        max_instances=1,
+        coalesce=True,
+    )
+
     return scheduler

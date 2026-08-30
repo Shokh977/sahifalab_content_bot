@@ -3,7 +3,7 @@ import json
 
 import asyncpg
 
-DEFAULT_MIX_TARGETS = {"news": 0.6, "tip": 0.3, "quote": 0.1}
+DEFAULT_MIX_TARGETS = {"finance": 0.40, "tip": 0.35, "news": 0.15, "quote": 0.10}
 
 
 async def get(pool: asyncpg.Pool, key: str, default=None):

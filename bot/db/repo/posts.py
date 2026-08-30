@@ -33,7 +33,7 @@ async def recent_pillar_counts(pool: asyncpg.Pool, window: int) -> dict[str, int
         """
         SELECT pillar, count(*) AS n FROM (
             SELECT pillar FROM content_posts
-            WHERE pillar IN ('news', 'tip', 'quote')
+            WHERE pillar IN ('news', 'tip', 'quote', 'finance')
             ORDER BY posted_at DESC
             LIMIT $1
         ) recent

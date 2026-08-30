@@ -41,3 +41,21 @@ async def set_score(pool: asyncpg.Pool, item_id: int, score: float) -> None:
 
 async def set_status(pool: asyncpg.Pool, item_id: int, status: str) -> None:
     await pool.execute("UPDATE items SET status = $2 WHERE id = $1", item_id, status)
+
+
+async def set_full_text(
+    pool: asyncpg.Pool, item_id: int, full_text: str | None, extraction_status: str
+) -> None:
+    await pool.execute(
+        "UPDATE items SET full_text = $2, extraction_status = $3 WHERE id = $1",
+        item_id, full_text, extraction_status,
+    )
+
+
+async def set_specificity(
+    pool: asyncpg.Pool, item_id: int, specificity_score: float, reject_reason: str | None
+) -> None:
+    await pool.execute(
+        "UPDATE items SET specificity_score = $2, reject_reason = $3 WHERE id = $1",
+        item_id, specificity_score, reject_reason,
+    )

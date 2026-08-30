@@ -6,6 +6,7 @@ from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 from bot.config import settings
 from bot.db.pool import get_pool
+from bot.db.repo import metrics as metrics_repo
 from bot.db.repo import sources as sources_repo
 from bot.telegram.states.admin_states import AddSourceStates
 
@@ -56,6 +57,7 @@ async def addsource_kind(callback: CallbackQuery, state: FSMContext):
     b = InlineKeyboardBuilder()
     b.button(text="News", callback_data="src_pillar:news")
     b.button(text="Tip", callback_data="src_pillar:tip")
+    b.button(text="Finance", callback_data="src_pillar:finance")
     b.adjust(2)
     await state.set_state(AddSourceStates.waiting_pillar)
     await callback.message.answer("Ustun (pillar):", reply_markup=b.as_markup())
@@ -102,10 +104,25 @@ async def cmd_listsources(message: Message):
     if not rows:
         await message.answer("Manbalar yo'q.")
         return
+
+    stats_by_id = {r["id"]: r for r in await metrics_repo.source_stats(pool)}
+
     lines = []
     for r in rows:
         status = "🟢" if r["active"] else "⚪"
-        lines.append(f"{status} #{r['id']} {r['name']} ({r['kind']}/{r['pillar'] or '-'}) — {r['url']}")
+        tag = f"/{r['tag']}" if r["tag"] else ""
+        lines.append(f"{status} #{r['id']} {r['name']} ({r['kind']}/{r['pillar'] or '-'}{tag}) — {r['url']}")
+
+        s = stats_by_id.get(r["id"])
+        if s and s["items_total"]:
+            total = s["items_total"]
+            extraction_attempted = s["extraction_ok"] + s["extraction_failed"]
+            extraction_rate = f"{round(s['extraction_ok'] / extraction_attempted * 100)}%" if extraction_attempted else "—"
+            rejection_rate = round(s["rejected"] / total * 100)
+            flag = " 🚩" if total >= 20 and rejection_rate > 60 else ""
+            lines.append(
+                f"     items:{total} extraction_ok:{extraction_rate} rejected:{rejection_rate}%{flag}"
+            )
     await message.answer("\n".join(lines))
 
 

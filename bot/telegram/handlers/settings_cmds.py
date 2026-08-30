@@ -77,18 +77,20 @@ async def cmd_setmix(message: Message):
         return
     parts = (message.text or "").split(maxsplit=1)
     if len(parts) < 2:
-        await message.answer("Foydalanish: /setmix news=60,tip=30,quote=10")
+        await message.answer("Foydalanish: /setmix finance=40,tip=35,news=15,quote=10")
         return
 
     try:
         pairs = [p.split("=") for p in parts[1].split(",")]
         raw = {k.strip(): float(v.strip()) for k, v in pairs}
     except ValueError:
-        await message.answer("Format xato. Masalan: /setmix news=60,tip=30,quote=10")
+        await message.answer("Format xato. Masalan: /setmix finance=40,tip=35,news=15,quote=10")
         return
 
-    if set(raw.keys()) != {"news", "tip", "quote"} or abs(sum(raw.values()) - 100) > 0.01:
-        await message.answer("news, tip, quote barchasi kerak va yig'indisi 100 bo'lishi kerak.")
+    if set(raw.keys()) != {"finance", "news", "tip", "quote"} or abs(sum(raw.values()) - 100) > 0.01:
+        await message.answer(
+            "finance, news, tip, quote barchasi kerak va yig'indisi 100 bo'lishi kerak."
+        )
         return
 
     targets = {k: v / 100 for k, v in raw.items()}

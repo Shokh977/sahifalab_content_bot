@@ -6,11 +6,12 @@ from bot.db.repo import items as items_repo
 from bot.drafting import llm_client
 
 
-async def draft_from_item(pool: asyncpg.Pool, item: asyncpg.Record) -> int:
+async def draft_from_item(pool: asyncpg.Pool, item: asyncpg.Record, *, full_text: str | None = None) -> int:
     body_text = await llm_client.generate_news_post(
         title=item["title"],
         summary=item["summary"] or "",
         url=item["url"],
+        full_text=full_text,
     )
     draft_id = await drafts_repo.create_text_draft(
         pool,

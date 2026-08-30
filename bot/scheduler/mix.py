@@ -1,7 +1,7 @@
-"""Weighted pillar selection to keep the posted mix near the 60/30/10
-news/tip/quote target over time. Polls and YouTube posts never go through
-this — they're admin-timed only (see bot/services/channel_poster.py and
-bot/telegram/handlers/approval.py), so they never distort the ratio.
+"""Weighted pillar selection to keep the posted mix near the
+finance/tip/news/quote target over time. Polls and YouTube posts never go
+through this — they're admin-timed only (see bot/services/channel_poster.py
+and bot/telegram/handlers/approval.py), so they never distort the ratio.
 """
 import random
 
@@ -12,7 +12,7 @@ from bot.db.repo import posts as posts_repo
 from bot.db.repo import settings as settings_repo
 
 MIX_WINDOW_SIZE = 20
-MIX_PILLARS = ("news", "tip", "quote")
+MIX_PILLARS = ("finance", "tip", "news", "quote")
 
 
 async def get_mix_targets(pool: asyncpg.Pool) -> dict[str, float]:

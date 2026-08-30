@@ -10,15 +10,17 @@ async def create(
     kind: str,
     pillar: str | None,
     created_by: int,
+    tag: str | None = None,
+    active: bool = False,
 ) -> int:
     row = await pool.fetchrow(
         """
-        INSERT INTO sources (name, url, kind, pillar, created_by)
-        VALUES ($1, $2, $3, $4, $5)
+        INSERT INTO sources (name, url, kind, pillar, created_by, tag, active)
+        VALUES ($1, $2, $3, $4, $5, $6, $7)
         ON CONFLICT (url) DO NOTHING
         RETURNING id
         """,
-        name, url, kind, pillar, created_by,
+        name, url, kind, pillar, created_by, tag, active,
     )
     return row["id"] if row else None
 

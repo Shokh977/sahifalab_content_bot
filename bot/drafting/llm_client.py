@@ -72,15 +72,34 @@ async def _generate(prompt: str, *, max_output_tokens: int = 400, temperature: f
     return response.text.strip()
 
 
-async def generate_news_post(*, title: str, summary: str, url: str) -> str:
+async def generate_news_post(*, title: str, summary: str, url: str, full_text: str | None = None) -> str:
+    body_source = full_text or summary
     prompt = (
         "NEWS item to draft a post about:\n"
         f"Title: {title}\n"
-        f"Summary: {summary}\n"
+        f"Article content: {body_source}\n"
         f"Source URL: {url}\n\n"
+        "Ground the post in the concrete details/numbers in the article content above — "
+        "do not pad it out with generic advice if the specifics run out. "
         "Write the Telegram post now. Do NOT include the source URL or any attribution line."
     )
     return await _generate(prompt)
+
+
+async def generate_finance_post(*, headline_facts: str) -> str:
+    """Data-first finance post — headline_facts already contains every number
+    (rates, % changes, indicator values) computed from stored history; the
+    model must only write prose around them, never invent or recompute a
+    figure."""
+    prompt = (
+        "FINANCE data to draft a post about. Use ONLY the numbers given below — do not "
+        "invent, round differently, or calculate any additional figures:\n\n"
+        f"{headline_facts}\n\n"
+        "Write the Telegram post now: a concrete hook built from these numbers, why it "
+        "matters for a young Uzbek — including diaspora sending/receiving money from Korea "
+        "or Russia — and a one-line practical takeaway."
+    )
+    return await _generate(prompt, temperature=0.6)
 
 
 async def generate_tip_post(*, theme: str, notes: str | None) -> str:
