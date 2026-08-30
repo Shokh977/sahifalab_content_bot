@@ -2,6 +2,7 @@
 import asyncpg
 
 PILLAR_LABELS = {
+    "finance": "💰 FINANCE",
     "news": "🗞 NEWS",
     "tip": "💡 TIP",
     "quote": "❝ QUOTE",
