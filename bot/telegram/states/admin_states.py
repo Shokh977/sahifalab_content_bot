@@ -20,12 +20,6 @@ class AddQuoteStates(StatesGroup):
     waiting_source_note = State()
 
 
-class AddFactStates(StatesGroup):
-    waiting_category = State()
-    waiting_fact_text = State()
-    waiting_source = State()
-
-
 class AddPollStates(StatesGroup):
     waiting_question = State()
     waiting_options = State()

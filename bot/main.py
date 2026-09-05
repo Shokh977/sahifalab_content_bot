@@ -14,7 +14,6 @@ from bot.scheduler.setup import build_scheduler
 from bot.telegram.handlers import (
     approval,
     cancel,
-    facts,
     polls,
     quotes,
     settings_cmds,
@@ -78,7 +77,6 @@ async def main():
     dp.include_router(sources.router)
     dp.include_router(topics.router)
     dp.include_router(quotes.router)
-    dp.include_router(facts.router)
     dp.include_router(polls.router)
     dp.include_router(settings_cmds.router)
     dp.include_router(cancel.router)
